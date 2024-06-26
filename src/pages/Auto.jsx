@@ -35,6 +35,7 @@ const Auto = () => {
     filnameLength: 100,
     autoUpscale: false,
     page: 1,
+    enhance: true,
   });
 
   useEffect(() => {
@@ -211,8 +212,13 @@ const Auto = () => {
           };
           for (const style of selectedStyles) {
             tasks.push(async () => {
-              // const prompt = await generatePrompt(title + " " + style.label);
-              await generate(layer_size, style, title);
+              let prompt = title;
+              if (formData.enhance) {
+                prompt = await generatePrompt(
+                  title + " in style of " + style.label,
+                );
+              }
+              await generate(layer_size, style, prompt);
               setInProgress((prev) => prev - 1);
             });
           }
@@ -347,8 +353,12 @@ const Auto = () => {
         Generate Some Beautiful Photos Today {inProgress > 0 && inProgress}
       </h1>
 
-      <form action="" onSubmit={handleGenerate}>
-        <div className="mt-8  h-[4.5rem] rounded-full border pr-2 dark:border-gray-600 dark:text-white">
+      <form
+        action=""
+        onSubmit={handleGenerate}
+        className="mt-8 flex items-center gap-5"
+      >
+        <div className=" h-[4.5rem] flex-1 rounded-full border pr-2 dark:border-gray-600 dark:text-white">
           <div className="flex h-full w-full items-center">
             <input
               type="text"
@@ -369,6 +379,31 @@ const Auto = () => {
               <p>Generate</p>
             </button>
           </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <label
+            htmlFor="enhance"
+            className="text-xl text-dark dark:text-white "
+          >
+            Let AI do the magic
+          </label>
+          <label className="inline-flex cursor-pointer items-center">
+            <input
+              id="enhance"
+              type="checkbox"
+              className="peer sr-only"
+              checked={formData.enhance}
+              onChange={(e) => {
+                setFormData((prev) => {
+                  return { ...prev, enhance: e.target.checked };
+                });
+              }}
+            />
+            <div className="after:start-[2px] peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800"></div>
+            <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+              {formData.enhance ? "On" : "Off"}
+            </span>
+          </label>
         </div>
       </form>
       <div className="relative mt-5 flex-1">
@@ -397,9 +432,7 @@ const Auto = () => {
       </div>
       <div className="flex gap-5">
         <div className="flex-1">
-          <h1 className="mt-5  text-xl text-dark dark:text-white ">
-            Select Preset
-          </h1>
+          <h1 className="mt-5  text-xl text-dark dark:text-white ">Preset</h1>
           <Select
             options={presets.map((preset, index) => ({
               value: index,
@@ -419,7 +452,7 @@ const Auto = () => {
         </div>
         <div className="flex-1">
           <h1 className="mt-5  text-xl text-dark dark:text-white ">
-            Select Image Styles
+            Image Styles
           </h1>
           <Select
             options={presets[selectedPresetType].styles}
@@ -438,7 +471,7 @@ const Auto = () => {
         </div>
         <div className="flex-1">
           <h1 className="mt-5  text-xl text-dark dark:text-white ">
-            Select Image Sizes
+            Image Sizes
           </h1>
           <Select
             options={sizeOptions}
@@ -569,11 +602,8 @@ const Auto = () => {
 
       <MasonaryLayout>
         {images.map((image, index) => (
-          <div>
-            <div
-              key={index}
-              className="group relative overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800"
-            >
+          <div key={index}>
+            <div className="group relative overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
               {image.loading && (
                 <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center bg-[#00000038] text-white">
                   <div className="h-5 w-5 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
@@ -625,7 +655,7 @@ const Auto = () => {
                 )}
               </div>
               <img
-                src={image.url}
+                src={image.thumb}
                 alt={index}
                 className="h-full w-full object-cover"
               />

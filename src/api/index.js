@@ -75,7 +75,10 @@ export const getImageById = async ({ token, id, prompt }) => {
     const blob = new Blob([response.data], { type: "image/png" });
     const imageURL = URL.createObjectURL(blob);
     const image = await Image.load(imageURL);
+    const thumb = image.resize({ width: 500, preserveAspectRatio: true });
+    const thumbUrl = thumb.toDataURL();
     const imageData = {
+      thumb: thumbUrl,
       url: imageURL,
       width: image.width,
       height: image.height,

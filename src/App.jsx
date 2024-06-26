@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Sidebar, Navbar, MobileNav } from "./components";
 import useWindowSize from "./hooks/WindowSize.js";
 import { ToastContainer } from "react-toastify";
@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   const navigate = useNavigate();
+   const location = useLocation();
   function checkTokenExpiration() {
     const accessToken = localStorage.getItem("accessToken");
     const accessTokenExpiresAt = localStorage.getItem("accessTokenExpiresAt");
@@ -20,7 +21,6 @@ const App = () => {
     const expirationTime = new Date(accessTokenExpiresAt);
 
     const currentTime = new Date();
-    console.log(currentTime, expirationTime);
     if (currentTime > expirationTime) {
       localStorage.removeItem("accessToken");
       navigate("/settings?error=expire"); // Redirect if no token
@@ -31,7 +31,7 @@ const App = () => {
   }
   useEffect(() => {
     const token = checkTokenExpiration();
-  }, []);
+  }, [location.pathname]);
 
   const windowSize = useWindowSize;
   return (

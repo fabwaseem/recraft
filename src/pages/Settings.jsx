@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const Settings = () => {
@@ -8,7 +8,7 @@ const Settings = () => {
   });
   const [searchParams] = useSearchParams();
   const errorType = searchParams.get("error") || null;
-
+  const navigate = useNavigate();
   const handleSave = (e) => {
     e.preventDefault();
     try {
@@ -16,6 +16,8 @@ const Settings = () => {
       if (parsedData) {
         localStorage.setItem("accessToken", parsedData.accessToken);
         localStorage.setItem("accessTokenExpiresAt", parsedData.expires);
+        toast.success("Token added successfully");
+        navigate("/auto");
       }
     } catch (error) {
       console.error("Error parsing JSON:", error);

@@ -18,15 +18,16 @@ import {
   ScissorsIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { sizes } from "../lib/config";
+import { presets, sizes } from "../lib/config";
 
 const Home = () => {
   const navigate = useNavigate();
   const [images, setImages] = useState([]);
+  const [selectedPresetType, setSelectedPresetType] = useState(0);
 
   const [formData, setFormData] = useState({
-    keyword: "",
     prompt: "",
+    enhance: true,
     multiplier: 1,
     extension: "jpg",
     token: "",
@@ -34,6 +35,10 @@ const Home = () => {
     autoUpscale: false,
   });
 
+  const handleChangePreset = (selectedOptions) => {
+    setSelectedPresetType(selectedOptions.value);
+    // setSelectedStyles([]);
+  };
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
@@ -49,54 +54,15 @@ const Home = () => {
   const handleGenerate = async (e) => {
     e.preventDefault();
 
-    // if (formData.keyword === "") {
-    //   return toast.error("Write a pormpt");
-    // }
-
-    // if (selectedStyles.length < 1) {
-    //   return toast.error("Select at least one style");
-    // }
-    // if (selectedSizes.length < 1) {
-    //   return toast.error("Select at least one size");
-    // }
-
-    // selectedSizes.forEach(() => {
-    //   selectedStyles.forEach(() => {
-    //     setInProgress((prev) => prev + 2);
-    //   });
-    // });
-
-    // selectedSizes.forEach(async (size) => {
-    //   const layer_size = {
-    //     height: size.height,
-    //     width: size.width,
-    //   };
-    //   selectedStyles.forEach(async (style) => {
-    //     const prompt = await generatePrompt(
-    //       formData.keyword + " " + style.label,
-    //     );
-    //     setFormData((prev) => {
-    //       return { ...prev, prompt };
-    //     });
-
-    //     generate(layer_size, style, prompt).then(() => {
-    //       setInProgress((prev) => prev - 2);
-    //     });
-    //   });
-    // });
-  };
-
-  const handleGenerateNo = async () => {
     if (formData.prompt === "") {
-      return toast.error("Write a pormpt");
-    }
-
-    if (selectedSizes.length < 1) {
-      return toast.error("Select at least one size");
+      return toast.error("Write a pormpt or a keyword");
     }
 
     if (selectedStyles.length < 1) {
       return toast.error("Select at least one style");
+    }
+    if (selectedSizes.length < 1) {
+      return toast.error("Select at least one size");
     }
 
     selectedSizes.forEach(() => {
@@ -110,8 +76,18 @@ const Home = () => {
         height: size.height,
         width: size.width,
       };
-      selectedStyles.forEach((style) => {
-        generate(layer_size, style, formData.prompt).then(() => {
+      selectedStyles.forEach(async (style) => {
+        let prompt = formData.prompt;
+        if (formData.enhance) {
+          prompt = await generatePrompt(
+            formData.keyword + " in style of " + style.label,
+          );
+        }
+        setFormData((prev) => {
+          return { ...prev, prompt };
+        });
+
+        generate(layer_size, style, prompt).then(() => {
           setInProgress((prev) => prev - 2);
         });
       });
@@ -270,74 +246,100 @@ const Home = () => {
             Generate Some Beautiful Photos Today {inProgress > 0 && inProgress}
           </h1>
         </div>
-        <button className="btn btn-primary h-[80%] bg-primary px-12 disabled:cursor-not-allowed disabled:opacity-70">
-          <p>Start Auto</p>
-        </button>
       </div>
 
       <form action="" onSubmit={handleGenerate}>
-        <div className="mt-8  h-[4.5rem] rounded-full border pr-2 dark:border-gray-600 dark:text-white">
-          <div className="flex h-full w-full items-center">
-            <input
-              type="text"
-              className="h-full w-full bg-transparent pl-8 outline-none"
-              placeholder="Generate high quality photos"
-              value={formData.keyword}
-              onChange={(e) =>
-                setFormData((prev) => {
-                  return { ...prev, keyword: e.target.value };
-                })
-              }
-            />
-            <button
-              type="submit"
-              className="btn btn-primary h-[80%] bg-primary px-12 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              <p>Generate</p>
-            </button>
+        <div className="mt-8 flex items-center gap-5">
+          <div className="h-[4.5rem] flex-1 rounded-full border pr-2 dark:border-gray-600 dark:text-white">
+            <div className="flex h-full w-full items-center">
+              <input
+                type="text"
+                className="h-full w-full bg-transparent pl-8 outline-none"
+                placeholder="Write a full prompt or just a keyword to let AI imagine the best"
+                value={formData.prompt}
+                onChange={(e) =>
+                  setFormData((prev) => {
+                    return { ...prev, prompt: e.target.value };
+                  })
+                }
+              />
+              <button
+                type="submit"
+                className="btn btn-primary h-[80%] bg-primary px-12 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <p>Generate</p>
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="mt-8  h-40 rounded-xl border pr-2 dark:border-gray-600 dark:text-white">
-          <div className="flex h-full w-full items-center">
-            <textarea
-              type="text"
-              className="h-full w-full bg-transparent pl-8 outline-none"
-              placeholder="Generate high quality photos"
-              value={formData.prompt}
-              onChange={(e) =>
-                setFormData((prev) => {
-                  return { ...prev, prompt: e.target.value };
-                })
-              }
-            />
-            <button
-              type="button"
-              onClick={handleGenerateNo}
-              className="btn btn-primary h-[80%] bg-primary px-12 disabled:cursor-not-allowed disabled:opacity-70"
+          <div className="flex items-center gap-4">
+            <label
+              htmlFor="enhance"
+              className="text-xl text-dark dark:text-white "
             >
-              <p>Generate</p>
-            </button>
+              Let AI do the magic
+            </label>
+            <label className="inline-flex cursor-pointer items-center">
+              <input
+                id="enhance"
+                type="checkbox"
+                className="peer sr-only"
+                checked={formData.enhance}
+                onChange={(e) => {
+                  setFormData((prev) => {
+                    return { ...prev, enhance: e.target.checked };
+                  });
+                }}
+              />
+              <div className="after:start-[2px] peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800"></div>
+              <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+                {formData.enhance ? "On" : "Off"}
+              </span>
+            </label>
           </div>
         </div>
       </form>
       <div className="flex gap-5">
         <div className="flex-1">
+          <h1 className="mt-5  text-xl text-dark dark:text-white ">Preset</h1>
+          <Select
+            options={presets.map((preset, index) => ({
+              value: index,
+              label: preset.preset,
+            }))}
+            value={{
+              value: selectedPresetType,
+              label: presets[selectedPresetType].preset,
+            }}
+            onChange={handleChangePreset}
+            classNames={{
+              control: () => "dark:bg-darkBg",
+              menu: () => "dark:bg-dark",
+              option: () => "dark:hover:text-dark ",
+            }}
+          />
+        </div>
+        <div className="flex-1">
           <h1 className="mt-5  text-xl text-dark dark:text-white ">
-            Select Image Styles
+            Image Styles
           </h1>
           <Select
-            options={styles}
+            options={presets[selectedPresetType].styles}
             isMulti
             value={selectedStyles.map((style) => ({
               value: style.value,
               label: style.label,
             }))}
             onChange={handleChangeStyles}
+            classNames={{
+              control: () => "dark:bg-darkBg",
+              menu: () => "dark:bg-dark",
+              option: () => "dark:hover:text-dark ",
+            }}
           />
         </div>
         <div className="flex-1">
           <h1 className="mt-5  text-xl text-dark dark:text-white ">
-            Select Image Sizes
+            Image Sizes
           </h1>
           <Select
             options={sizeOptions}
@@ -346,6 +348,11 @@ const Home = () => {
               value: size,
               label: `${size.width} x ${size.height} (${size.ratio})`,
             }))}
+            classNames={{
+              control: () => "dark:bg-darkBg",
+              menu: () => "dark:bg-dark",
+              option: () => "dark:hover:text-dark ",
+            }}
             onChange={handleChange}
           />
         </div>
@@ -457,63 +464,65 @@ const Home = () => {
 
       <MasonaryLayout>
         {images.map((image, index) => (
-          <div
-            key={index}
-            className="group relative overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800"
-          >
-            {image.loading && (
-              <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center bg-[#00000038] text-white">
-                <div className="h-5 w-5 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
-                <div className="h-5 w-5 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
-                <div className="h-5 w-5 animate-bounce rounded-full bg-white"></div>
+          <div key={index}>
+            <div className="group relative overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
+              {image.loading && (
+                <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center bg-[#00000038] text-white">
+                  <div className="h-5 w-5 animate-bounce rounded-full bg-white [animation-delay:-0.3s]"></div>
+                  <div className="h-5 w-5 animate-bounce rounded-full bg-white [animation-delay:-0.15s]"></div>
+                  <div className="h-5 w-5 animate-bounce rounded-full bg-white"></div>
+                </div>
+              )}
+              {/* remove button */}
+              <div className="absolute -top-20 right-2  flex gap-3 opacity-0 transition-all group-hover:top-1 group-hover:opacity-100">
+                <span
+                  className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
+                  onClick={() => handleDelete(index)}
+                >
+                  <XMarkIcon className="h-6 w-6 text-white" />
+                </span>
               </div>
-            )}
-            {/* remove button */}
-            <div className="absolute -top-20 right-2  flex gap-3 opacity-0 transition-all group-hover:top-1 group-hover:opacity-100">
-              <span
-                className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
-                onClick={() => handleDelete(index)}
-              >
-                <XMarkIcon className="h-6 w-6 text-white" />
-              </span>
-            </div>
-            <div className="absolute bottom-1 left-2 flex h-10 items-center rounded bg-[#00000038] px-4 text-white">
-              {formData.multiplier * image.width} x{" "}
-              {formData.multiplier * image.height}
-            </div>
-            <div className="absolute -bottom-20 right-2  flex gap-3 opacity-0 transition-all group-hover:bottom-0 group-hover:opacity-100">
-              <DownloadButton
-                blob={image.url}
-                fileName={
-                  image.prompt
-                    .replace(/[^a-zA-Z0-9 ]/g, "")
-                    .slice(0, formData.filnameLength) || "image"
-                }
-                extension={image.bgRemoved ? "png" : formData.extension}
-                sizeMultiplier={formData.multiplier}
+              <div className="absolute bottom-1 left-2 flex h-10 items-center rounded bg-[#00000038] px-4 text-white">
+                {formData.multiplier * image.width} x{" "}
+                {formData.multiplier * image.height}
+              </div>
+              <div className="absolute -bottom-20 right-2  flex gap-3 opacity-0 transition-all group-hover:bottom-0 group-hover:opacity-100">
+                <DownloadButton
+                  blob={image.url}
+                  fileName={
+                    image.prompt
+                      .replace(/[^a-zA-Z0-9 ]/g, "")
+                      .slice(0, formData.filnameLength) || "image"
+                  }
+                  extension={image.bgRemoved ? "png" : formData.extension}
+                  sizeMultiplier={formData.multiplier}
+                  index={index}
+                  setImages={setImages}
+                />
+                {!image.bgRemoved && !image.loading && (
+                  <span
+                    className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
+                    onClick={() => handleRemove(image)}
+                  >
+                    <ScissorsIcon className="h-6 w-6 text-white" />
+                  </span>
+                )}
+                {!image.upscaled && !image.loading && (
+                  <span
+                    className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
+                    onClick={() => handleUpscale(image)}
+                  >
+                    <ArrowsPointingOutIcon className="h-6 w-6 text-white" />
+                  </span>
+                )}
+              </div>
+              <img
+                src={image.thumb}
+                alt={index}
+                className="h-full w-full object-cover"
               />
-              {!image.bgRemoved && !image.loading && (
-                <span
-                  className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
-                  onClick={() => handleRemove(image)}
-                >
-                  <ScissorsIcon className="h-6 w-6 text-white" />
-                </span>
-              )}
-              {!image.upscaled && !image.loading && (
-                <span
-                  className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
-                  onClick={() => handleUpscale(image)}
-                >
-                  <ArrowsPointingOutIcon className="h-6 w-6 text-white" />
-                </span>
-              )}
             </div>
-            <img
-              src={image.url}
-              alt={index}
-              className="h-full w-full object-cover"
-            />
+            <p className="">{image.prompt}</p>
           </div>
         ))}
       </MasonaryLayout>

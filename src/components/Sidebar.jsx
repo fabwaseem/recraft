@@ -18,16 +18,16 @@ const Sidebar = () => {
         </NavLinkItem>
         <NavLinkItem to={"/auto"}>
           <MagnifyingGlassIcon className="w-5" />
-          <span className="text-xs">Search</span>
+          <span className="text-xs">Auto</span>
         </NavLinkItem>
-        <NavLinkItem to={"/saved"}>
+        {/* <NavLinkItem to={"/saved"}>
           <BookmarkIcon className="w-5" />
           <span className="text-xs">Saved</span>
         </NavLinkItem>
         <NavLinkItem to={"/upload"}>
           <ArrowUpTrayIcon className="w-5" />
           <span className="text-xs">Upload</span>
-        </NavLinkItem>
+        </NavLinkItem> */}
       </ul>
       <ul className="flex flex-col gap-7 py-6">
         <NavLinkItem to={"/settings"}>
