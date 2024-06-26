@@ -60,6 +60,7 @@ const Settings = () => {
           </label>
           <a
             href="https://app.recraft.ai/api/auth/session"
+            target="_blank"
             className="mt-2 block w-max text-sm hover:text-primary"
           >
             Get token
