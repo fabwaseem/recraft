@@ -1,0 +1,44 @@
+@import url(https://fonts.googleapis.com/css?family=Poppins:100,100italic,200,200italic,300,300italic,regular,italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic);
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  ::-webkit-scrollbar {
+    width: 4px;
+    cursor: pointer;
+    /*background-color: rgba(229, 231, 235, var(--bg-opacity));*/
+  }
+  ::-webkit-scrollbar-track {
+    background-color: rgba(229, 231, 235, var(--bg-opacity));
+    cursor: pointer;
+    /*background: red;*/
+  }
+  ::-webkit-scrollbar-thumb {
+    cursor: pointer;
+    background-color: #a0aec0;
+    /*outline: 1px solid slategrey;*/
+  }
+  * {
+    font-family: "Poppins", sans-serif;
+  }
+  .my-masonry-grid_column > div {
+    margin-bottom: 0.5rem;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply rounded-full px-6 py-[8px]  text-sm transition-all flex items-center;
+  }
+  .btn-secondary {
+    @apply border-[1px] border-gray-300 text-dark dark:text-white;
+  }
+  .btn-primary {
+    @apply bg-dark text-white dark:bg-white dark:text-dark;
+  }
+  .nav-link {
+    @apply flex items-center justify-center flex-col gap-2 transition-colors;
+  }
+}
