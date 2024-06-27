@@ -10,7 +10,7 @@ import {
 import { DownloadButton } from "../components";
 import { toast } from "react-toastify";
 import Select from "react-select";
-import { generatePrompt } from "../lib/utils";
+import { generatePrompt, handleDownloadAll } from "../lib/utils";
 import Image from "image-js";
 import {
   ArrowsPointingOutIcon,
@@ -21,6 +21,7 @@ import { presets, sizes } from "../lib/config";
 import axios from "axios";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
+import DownloadSvg from "../components/DownloadSvg";
 
 const Auto = () => {
   const [images, setImages] = useState([]);
@@ -35,7 +36,7 @@ const Auto = () => {
     filnameLength: 100,
     autoUpscale: false,
     page: 1,
-    enhance: true,
+    enhance: false,
   });
 
   useEffect(() => {
@@ -304,45 +305,7 @@ const Auto = () => {
     return titles;
   };
 
-  const handleDownloadAll = async () => {
-    // blob={image.url}
-    //             fileName={
-    //               image.prompt
-    //                 .replace(/[^a-zA-Z0-9 ]/g, "")
-    //                 .slice(0, formData.filnameLength) || "image"
-    //             }
-    //             extension={image.bgRemoved ? "png" : formData.extension}
-    //             sizeMultiplier={formData.multiplier}
-    const sizeMultiplier = formData.multiplier;
-    const zip = new JSZip();
-    const folder = zip.folder("images");
 
-    const promises = images.map(async (img, index) => {
-      const image = await Image.load(img.url);
-      const fileName =
-        img.prompt
-          .replace(/[^a-zA-Z0-9 ]/g, "")
-          .slice(0, formData.filnameLength) || "image";
-      const extension = img.bgRemoved ? "png" : formData.extension;
-      let resizedImage = image;
-      if (sizeMultiplier > 1) {
-        resizedImage = image.resize({
-          width: image.width * sizeMultiplier,
-          height: image.height * sizeMultiplier,
-        });
-      }
-
-      const resizedBlob = await resizedImage.toBlob("image/png");
-      const fileNameWithExtension = `${fileName} - ${index + 1}.${extension}`;
-      folder.file(fileNameWithExtension, resizedBlob);
-    });
-
-    await Promise.all(promises);
-
-    zip.generateAsync({ type: "blob" }).then((content) => {
-      saveAs(content, `images.zip`);
-    });
-  };
 
   return (
     <div>
@@ -594,7 +557,7 @@ const Auto = () => {
         </button>
         <button
           className={`rounded-md border p-1 text-xs hover:bg-gray-100 focus:outline-none  focus:ring focus:ring-blue-300`}
-          onClick={() => handleDownloadAll()}
+          onClick={() => handleDownloadAll(images, formData)}
         >
           Download all
         </button>
@@ -625,18 +588,32 @@ const Auto = () => {
                 {formData.multiplier * image.height}
               </div>
               <div className="absolute -bottom-20 right-2  flex gap-3 opacity-0 transition-all group-hover:bottom-0 group-hover:opacity-100">
-                <DownloadButton
-                  blob={image.url}
-                  fileName={
-                    image.prompt
-                      .replace(/[^a-zA-Z0-9 ]/g, "")
-                      .slice(0, formData.filnameLength) || "image"
-                  }
-                  extension={image.bgRemoved ? "png" : formData.extension}
-                  sizeMultiplier={formData.multiplier}
-                  index={index}
-                  setImages={setImages}
-                />
+                {image.isVector ? (
+                  <DownloadSvg
+                    svg={image.url}
+                    fileName={
+                      image.prompt
+                        .replace(/[^a-zA-Z0-9 ]/g, "")
+                        .slice(0, formData.filnameLength) || "image"
+                    }
+                    sizeMultiplier={formData.multiplier}
+                    index={index}
+                    setImages={setImages}
+                  />
+                ) : (
+                  <DownloadButton
+                    blob={image.url}
+                    fileName={
+                      image.prompt
+                        .replace(/[^a-zA-Z0-9 ]/g, "")
+                        .slice(0, formData.filnameLength) || "image"
+                    }
+                    extension={image.bgRemoved ? "png" : formData.extension}
+                    sizeMultiplier={formData.multiplier}
+                    index={index}
+                    setImages={setImages}
+                  />
+                )}
                 {!image.bgRemoved && !image.loading && (
                   <span
                     className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"

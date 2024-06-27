@@ -1,5 +1,9 @@
 import axios from "axios";
-import { createSVGFromJSON, getRandomNumber } from "../lib/utils";
+import {
+  createSVGFromJSON,
+  getRandomNumber,
+  svgToPngDataUrl,
+} from "../lib/utils";
 import Image from "image-js";
 
 export const generateImages = async ({
@@ -47,9 +51,30 @@ export const getImagesById = async ({ token, id, prompt }) => {
     const images = [];
     for (const image of imagesData) {
       if (image.vector_image) {
-        console.log(image);
         const svgData = createSVGFromJSON(image.rector);
-        console.log(svgData);
+        const dataUrl = await svgToPngDataUrl(
+          svgData,
+          image.rector.width,
+          image.rector.height,
+        );
+        const loadedImage = await Image.load(dataUrl);
+        const thumb = loadedImage.resize({
+          width: 500,
+          preserveAspectRatio: true,
+        });
+        const thumbUrl = thumb.toDataURL();
+        const imageData = {
+          thumb: thumbUrl,
+          url: svgData,
+          width: image.rector.width,
+          height: image.rector.height,
+          prompt,
+          bgRemoved: false,
+          loading: false,
+          upscaled: false,
+          isVector: true,
+        };
+        images.push(imageData);
       } else {
         const newImage = await getImageById({
           token,
@@ -86,6 +111,7 @@ export const getImageById = async ({ token, id, prompt }) => {
       bgRemoved: false,
       loading: false,
       upscaled: false,
+      isVector: false,
     };
     return imageData;
   } catch (error) {

@@ -103,36 +103,36 @@ export const presets = [
       },
     ],
   },
-  // {
-  //   type: "vector",
-  //   preset: "vector",
-  //   styles: [
-  //     {
-  //       label: "Vector Art",
-  //       value: "vector_illustration",
-  //     },
-  //     {
-  //       label: "Flying Blobs",
-  //       value: "vector_illustration_line_circuit",
-  //     },
-  //     {
-  //       label: "Seamless Vector",
-  //       value: "vector_illustration_seamless",
-  //     },
-  //     {
-  //       label: "Line Art",
-  //       value: "vector_illustration_line_art",
-  //     },
-  //     {
-  //       label: "Cartoon",
-  //       value: "vector_illustration_cartoon",
-  //     },
-  //     {
-  //       label: "Vector Kawaii",
-  //       value: "vector_illustration_kawaii",
-  //     },
-  //   ],
-  // },
+  {
+    type: "vector",
+    preset: "vector",
+    styles: [
+      {
+        label: "Vector Art",
+        value: "vector_illustration",
+      },
+      {
+        label: "Flying Blobs",
+        value: "vector_illustration_line_circuit",
+      },
+      {
+        label: "Seamless Vector",
+        value: "vector_illustration_seamless",
+      },
+      {
+        label: "Line Art",
+        value: "vector_illustration_line_art",
+      },
+      {
+        label: "Cartoon",
+        value: "vector_illustration_cartoon",
+      },
+      {
+        label: "Vector Kawaii",
+        value: "vector_illustration_kawaii",
+      },
+    ],
+  },
 ];
 export const sizes = [
   {

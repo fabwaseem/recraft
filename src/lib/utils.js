@@ -1,3 +1,4 @@
+import JSZip from "jszip";
 import OpenAI from "openai";
 
 export const getRandomNumber = (len) => {
@@ -35,10 +36,26 @@ export const createSVGFromJSON = (data) => {
     return acc;
   }, {});
 
+  let gradientCounter = 0;
+  const gradients = [];
   const paths = shapes
     .map((shape, index) => {
       const style = styleDict[shape.style_index];
-      const fill = style.fill.solid_color.rgba_hex;
+      let fill = "";
+      if (style.fill.style_type === "solid") {
+        fill = style.fill.solid_color.rgba_hex;
+      } else if (style.fill.style_type === "linear") {
+        const gradientId = `grad${gradientCounter++}`;
+        fill = `url(#${gradientId})`;
+        const { start_color, finish_color, start_point, finish_point } =
+          style.fill;
+        gradients.push(`
+        <linearGradient id="${gradientId}" x1="${start_point.x}" y1="${start_point.y}" x2="${finish_point.x}" y2="${finish_point.y}">
+          <stop offset="0%" stop-color="${start_color.rgba_hex}" />
+          <stop offset="100%" stop-color="${finish_color.rgba_hex}" />
+        </linearGradient>
+      `);
+      }
       const stroke =
         style.stroke.style_type === "none" ? "none" : style.stroke.style_type;
       const strokeWidth = style.stroke_width;
@@ -47,7 +64,95 @@ export const createSVGFromJSON = (data) => {
     })
     .join("");
 
-  const svgString = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${paths}</svg>`;
+  const defs = gradients.length ? `<defs>${gradients.join("")}</defs>` : "";
+  const svgString = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" >${defs}${paths}</svg>`;
 
   return svgString;
+};
+
+export function svgToPngDataUrl(svgString, width, height) {
+  return new Promise((resolve, reject) => {
+    try {
+      const svgBlob = new Blob([svgString], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const url = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+
+          ctx.drawImage(img, 0, 0);
+
+          // Get the data URL as a PNG image
+          const pngDataUrl = canvas.toDataURL("image/png");
+
+          // Clean up
+          URL.revokeObjectURL(url);
+
+          resolve(pngDataUrl);
+        } catch (canvasError) {
+          console.error("Error drawing SVG on canvas:", canvasError);
+          reject(canvasError);
+        }
+      };
+
+      img.onerror = (err) => {
+        console.error("Error loading SVG image:", err);
+        URL.revokeObjectURL(url);
+        reject(err);
+      };
+
+      img.src = url;
+    } catch (error) {
+      console.error("Error creating Blob or URL:", error);
+      reject(error);
+    }
+  });
+}
+
+export const handleDownloadAll = async (images, formData) => {
+  const sizeMultiplier = formData.multiplier;
+  const zip = new JSZip();
+  const folder = zip.folder("images");
+
+  const promises = images.map(async (img, index) => {
+    const fileName =
+      img.prompt
+        .replace(/[^a-zA-Z0-9 ]/g, "")
+        .slice(0, formData.filnameLength) || "image";
+
+    if (img.isVector) {
+      const svgBlob = new Blob([img.url], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      const fileNameWithExtension = `${fileName} - ${index + 1}.svg`;
+      folder.file(fileNameWithExtension, svgBlob);
+    } else {
+      const image = await Image.load(img.url);
+
+      const extension = img.bgRemoved ? "png" : formData.extension;
+      let resizedImage = image;
+      if (sizeMultiplier > 1) {
+        resizedImage = image.resize({
+          width: image.width * sizeMultiplier,
+          height: image.height * sizeMultiplier,
+        });
+      }
+
+      const resizedBlob = await resizedImage.toBlob("image/png");
+      const fileNameWithExtension = `${fileName} - ${index + 1}.${extension}`;
+      folder.file(fileNameWithExtension, resizedBlob);
+    }
+  });
+
+  await Promise.all(promises);
+
+  zip.generateAsync({ type: "blob" }).then((content) => {
+    saveAs(content, `images.zip`);
+  });
 };

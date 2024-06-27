@@ -11,7 +11,7 @@ import { DownloadButton } from "../components";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Select from "react-select";
-import { generatePrompt } from "../lib/utils";
+import { generatePrompt, handleDownloadAll } from "../lib/utils";
 import Image from "image-js";
 import {
   ArrowsPointingOutIcon,
@@ -19,6 +19,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { presets, sizes } from "../lib/config";
+import DownloadSvg from "../components/DownloadSvg";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Home = () => {
 
   const [formData, setFormData] = useState({
     prompt: "",
-    enhance: true,
+    enhance: false,
     multiplier: 1,
     extension: "jpg",
     token: "",
@@ -80,7 +81,7 @@ const Home = () => {
         let prompt = formData.prompt;
         if (formData.enhance) {
           prompt = await generatePrompt(
-            formData.keyword + " in style of " + style.label,
+            formData.prompt + " in style of " + style.label,
           );
         }
         setFormData((prev) => {
@@ -460,6 +461,12 @@ const Home = () => {
         >
           Clear all
         </button>
+        <button
+          className={`rounded-md border p-1 text-xs hover:bg-gray-100 focus:outline-none  focus:ring focus:ring-blue-300`}
+          onClick={() => handleDownloadAll(images,formData)}
+        >
+          Download all
+        </button>
       </h1>
 
       <MasonaryLayout>
@@ -487,18 +494,32 @@ const Home = () => {
                 {formData.multiplier * image.height}
               </div>
               <div className="absolute -bottom-20 right-2  flex gap-3 opacity-0 transition-all group-hover:bottom-0 group-hover:opacity-100">
-                <DownloadButton
-                  blob={image.url}
-                  fileName={
-                    image.prompt
-                      .replace(/[^a-zA-Z0-9 ]/g, "")
-                      .slice(0, formData.filnameLength) || "image"
-                  }
-                  extension={image.bgRemoved ? "png" : formData.extension}
-                  sizeMultiplier={formData.multiplier}
-                  index={index}
-                  setImages={setImages}
-                />
+                {image.isVector ? (
+                  <DownloadSvg
+                    svg={image.url}
+                    fileName={
+                      image.prompt
+                        .replace(/[^a-zA-Z0-9 ]/g, "")
+                        .slice(0, formData.filnameLength) || "image"
+                    }
+                    sizeMultiplier={formData.multiplier}
+                    index={index}
+                    setImages={setImages}
+                  />
+                ) : (
+                  <DownloadButton
+                    blob={image.url}
+                    fileName={
+                      image.prompt
+                        .replace(/[^a-zA-Z0-9 ]/g, "")
+                        .slice(0, formData.filnameLength) || "image"
+                    }
+                    extension={image.bgRemoved ? "png" : formData.extension}
+                    sizeMultiplier={formData.multiplier}
+                    index={index}
+                    setImages={setImages}
+                  />
+                )}
                 {!image.bgRemoved && !image.loading && (
                   <span
                     className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
