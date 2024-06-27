@@ -143,7 +143,7 @@ const Home = () => {
     setSelectedSizes(
       selectedOptions ? selectedOptions.map((option) => option.value) : [],
     );
-    console.log(selectedSizes);
+
   };
   const handleChangeStyles = (selectedOptions) => {
     setSelectedStyles(
@@ -156,7 +156,6 @@ const Home = () => {
           })
         : [],
     );
-    console.log(selectedStyles);
   };
 
   const handleRemove = async (image) => {

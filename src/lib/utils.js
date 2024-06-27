@@ -65,9 +65,7 @@ export const createSVGFromJSON = (data) => {
     .join("");
 
   const defs = gradients.length ? `<defs>${gradients.join("")}</defs>` : "";
-  const svgString = `
-  <?xml version="1.0" encoding="utf-8" ?>
-  <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >${defs}${paths}</svg>`;
+  const svgString = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >${defs}${paths}</svg>`;
 
   return svgString;
 };

@@ -30,8 +30,6 @@ export const generateImages = async ({
       };
     }
 
-    console.log(payload);
-
     const response = await axios.post(
       `https://api.recraft.ai/queue_recraft/prompt_to_image`,
       { ...payload },
