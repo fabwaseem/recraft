@@ -34,6 +34,7 @@ const Home = () => {
     token: "",
     filnameLength: 100,
     autoUpscale: false,
+    complexity: undefined,
   });
 
   const handleChangePreset = (selectedOptions) => {
@@ -88,20 +89,21 @@ const Home = () => {
           return { ...prev, prompt };
         });
 
-        generate(layer_size, style, prompt).then(() => {
+        generate(layer_size, style, prompt, formData).then(() => {
           setInProgress((prev) => prev - 2);
         });
       });
     });
   };
 
-  const generate = async (layer_size, style, prompt) => {
+  const generate = async (layer_size, style, prompt, formData) => {
     try {
       const response = await generateImages({
         prompt,
         token: formData.token,
         layer_size,
         image_type: style.value,
+        formData,
       });
       await fetchImages(response.data.operationId, prompt);
     } catch (error) {
@@ -381,6 +383,34 @@ const Home = () => {
       </div>
       <div className="mt-5 flex gap-5">
         <div className="relative flex-1">
+          <input
+            type="number"
+            className=" peer block w-full rounded-lg border bg-transparent p-4 text-sm text-dark dark:border-gray-600 dark:text-white [&:not(:placeholder-shown)]:pt-6 [&:not(:placeholder-shown)]:pb-2"
+            min={0}
+            max={4}
+            defaultValue={formData.complexity}
+            onChange={(e) => {
+              setFormData((prev) => {
+                return {
+                  ...prev,
+                  complexity: e.target.value ? e.target.value : undefined,
+                };
+              });
+            }}
+          />
+          <label
+            className="start-0 pointer-events-none absolute top-0 h-full truncate border border-transparent p-4 transition duration-100 ease-in-out peer-focus:-translate-y-1.5 peer-focus:text-xs peer-focus:text-gray-500
+    peer-disabled:pointer-events-none
+    peer-disabled:opacity-50
+    peer-[:not(:placeholder-shown)]:-translate-y-1.5
+    peer-[:not(:placeholder-shown)]:text-xs
+    peer-[:not(:placeholder-shown)]:text-gray-500
+    dark:text-white"
+          >
+            Complexity
+          </label>
+        </div>
+        <div className="relative flex-1">
           <select
             className=" peer block w-full rounded-lg border bg-transparent p-4 text-sm text-dark dark:border-gray-600 dark:text-white [&:not(:placeholder-shown)]:pt-6 [&:not(:placeholder-shown)]:pb-2"
             onChange={(e) => {
@@ -463,7 +493,7 @@ const Home = () => {
         </button>
         <button
           className={`rounded-md border p-1 text-xs hover:bg-gray-100 focus:outline-none  focus:ring focus:ring-blue-300`}
-          onClick={() => handleDownloadAll(images,formData)}
+          onClick={() => handleDownloadAll(images, formData)}
         >
           Download all
         </button>
@@ -520,7 +550,7 @@ const Home = () => {
                     setImages={setImages}
                   />
                 )}
-                {!image.bgRemoved && !image.loading && (
+                {!image.isVector && !image.bgRemoved && !image.loading && (
                   <span
                     className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
                     onClick={() => handleRemove(image)}
@@ -528,7 +558,7 @@ const Home = () => {
                     <ScissorsIcon className="h-6 w-6 text-white" />
                   </span>
                 )}
-                {!image.upscaled && !image.loading && (
+                {!image.isVector &&  !image.upscaled && !image.loading && (
                   <span
                     className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
                     onClick={() => handleUpscale(image)}

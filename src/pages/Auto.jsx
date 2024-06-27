@@ -19,8 +19,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { presets, sizes } from "../lib/config";
 import axios from "axios";
-import { saveAs } from "file-saver";
-import JSZip from "jszip";
 import DownloadSvg from "../components/DownloadSvg";
 
 const Auto = () => {
@@ -37,6 +35,7 @@ const Auto = () => {
     autoUpscale: false,
     page: 1,
     enhance: false,
+    complexity: undefined,
   });
 
   useEffect(() => {
@@ -219,7 +218,7 @@ const Auto = () => {
                   title + " in style of " + style.label,
                 );
               }
-              await generate(layer_size, style, prompt);
+              await generate(layer_size, style, prompt, formData);
               setInProgress((prev) => prev - 1);
             });
           }
@@ -255,13 +254,14 @@ const Auto = () => {
     return Promise.all(results);
   };
 
-  const generate = async (layer_size, style, prompt) => {
+  const generate = async (layer_size, style, prompt, formData) => {
     try {
       const response = await generateImages({
         prompt,
         token: formData.token,
         layer_size,
         image_type: style.value,
+        formData,
       });
       await fetchImages(response.data.operationId, prompt);
     } catch (error) {
@@ -304,8 +304,6 @@ const Auto = () => {
     traverse(data);
     return titles;
   };
-
-
 
   return (
     <div>
@@ -451,6 +449,7 @@ const Auto = () => {
             onChange={handleChange}
           />
         </div>
+
         <div>
           <h1 className="mt-5  text-xl text-dark dark:text-white ">
             Auto Upscale
@@ -474,6 +473,34 @@ const Auto = () => {
         </div>
       </div>
       <div className="mt-5 flex gap-5">
+        <div className="relative flex-1">
+          <input
+            type="number"
+            className=" peer block w-full rounded-lg border bg-transparent p-4 text-sm text-dark dark:border-gray-600 dark:text-white [&:not(:placeholder-shown)]:pt-6 [&:not(:placeholder-shown)]:pb-2"
+            min={0}
+            max={4}
+            defaultValue={formData.complexity}
+            onChange={(e) => {
+              setFormData((prev) => {
+                return {
+                  ...prev,
+                  complexity: e.target.value ? e.target.value : undefined,
+                };
+              });
+            }}
+          />
+          <label
+            className="start-0 pointer-events-none absolute top-0 h-full truncate border border-transparent p-4 transition duration-100 ease-in-out peer-focus:-translate-y-1.5 peer-focus:text-xs peer-focus:text-gray-500
+    peer-disabled:pointer-events-none
+    peer-disabled:opacity-50
+    peer-[:not(:placeholder-shown)]:-translate-y-1.5
+    peer-[:not(:placeholder-shown)]:text-xs
+    peer-[:not(:placeholder-shown)]:text-gray-500
+    dark:text-white"
+          >
+            Complexity
+          </label>
+        </div>
         <div className="relative flex-1">
           <select
             className=" peer block w-full rounded-lg border bg-transparent p-4 text-sm text-dark dark:border-gray-600 dark:text-white [&:not(:placeholder-shown)]:pt-6 [&:not(:placeholder-shown)]:pb-2"

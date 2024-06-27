@@ -11,6 +11,7 @@ export const generateImages = async ({
   prompt,
   layer_size,
   image_type = "realistic_image",
+  formData,
 }) => {
   try {
     const payload = {
@@ -22,6 +23,14 @@ export const generateImages = async ({
       random_seed: getRandomNumber(10),
       developer_params: {},
     };
+
+    if (formData.complexity) {
+      payload.user_controls = {
+        complexity: parseInt(formData.complexity),
+      };
+    }
+
+    console.log(payload);
 
     const response = await axios.post(
       `https://api.recraft.ai/queue_recraft/prompt_to_image`,
@@ -59,7 +68,7 @@ export const getImagesById = async ({ token, id, prompt }) => {
         );
         const loadedImage = await Image.load(dataUrl);
         const thumb = loadedImage.resize({
-          width: 500,
+          width: 1000,
           preserveAspectRatio: true,
         });
         const thumbUrl = thumb.toDataURL();
@@ -100,7 +109,7 @@ export const getImageById = async ({ token, id, prompt }) => {
     const blob = new Blob([response.data], { type: "image/png" });
     const imageURL = URL.createObjectURL(blob);
     const image = await Image.load(imageURL);
-    const thumb = image.resize({ width: 500, preserveAspectRatio: true });
+    const thumb = image.resize({ width: 1000, preserveAspectRatio: true });
     const thumbUrl = thumb.toDataURL();
     const imageData = {
       thumb: thumbUrl,

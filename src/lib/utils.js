@@ -50,7 +50,7 @@ export const createSVGFromJSON = (data) => {
         const { start_color, finish_color, start_point, finish_point } =
           style.fill;
         gradients.push(`
-        <linearGradient id="${gradientId}" x1="${start_point.x}" y1="${start_point.y}" x2="${finish_point.x}" y2="${finish_point.y}">
+        <linearGradient id="${gradientId}" gradientUnits="userSpaceOnUse" x1="${start_point.x}" y1="${start_point.y}" x2="${finish_point.x}" y2="${finish_point.y}">
           <stop offset="0%" stop-color="${start_color.rgba_hex}" />
           <stop offset="100%" stop-color="${finish_color.rgba_hex}" />
         </linearGradient>
@@ -65,7 +65,9 @@ export const createSVGFromJSON = (data) => {
     .join("");
 
   const defs = gradients.length ? `<defs>${gradients.join("")}</defs>` : "";
-  const svgString = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" >${defs}${paths}</svg>`;
+  const svgString = `
+  <?xml version="1.0" encoding="utf-8" ?>
+  <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >${defs}${paths}</svg>`;
 
   return svgString;
 };
