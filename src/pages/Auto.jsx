@@ -265,6 +265,8 @@ const Auto = () => {
       });
       await fetchImages(response.data.operationId, prompt);
     } catch (error) {
+      toast.error(error.response?.data?.code || error.message);
+
       console.log(error);
     }
   };
@@ -285,6 +287,8 @@ const Auto = () => {
         });
       }
     } catch (error) {
+      toast.error(error.response?.data?.code || error.message);
+
       console.log(error);
     }
   };
@@ -307,13 +311,6 @@ const Auto = () => {
 
   return (
     <div>
-      <h1 className="text-3xl font-[600] text-[#414141]  dark:text-white">
-        Welcome Mate!
-      </h1>
-      <h1 className="mt-3 text-3xl text-dark dark:text-white ">
-        Generate Some Beautiful Photos Today {inProgress > 0 && inProgress}
-      </h1>
-
       <form
         action=""
         onSubmit={handleGenerate}
@@ -335,9 +332,9 @@ const Auto = () => {
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary h-[80%] bg-primary px-12 disabled:cursor-not-allowed disabled:opacity-70"
+              className="btn btn-primary h-[80%] whitespace-nowrap bg-primary px-12 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              <p>Generate</p>
+              {inProgress > 0 ? `Generating ${inProgress} images` : "Generate"}
             </button>
           </div>
         </div>

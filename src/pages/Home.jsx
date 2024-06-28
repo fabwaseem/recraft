@@ -107,6 +107,8 @@ const Home = () => {
       });
       await fetchImages(response.data.operationId, prompt);
     } catch (error) {
+      toast.error(error.response?.data?.code || error.message);
+
       console.log(error);
     }
   };
@@ -127,6 +129,7 @@ const Home = () => {
         });
       }
     } catch (error) {
+      toast.error(error.response?.data?.code || error.message);
       console.log(error);
     }
   };
@@ -143,7 +146,6 @@ const Home = () => {
     setSelectedSizes(
       selectedOptions ? selectedOptions.map((option) => option.value) : [],
     );
-
   };
   const handleChangeStyles = (selectedOptions) => {
     setSelectedStyles(
@@ -239,17 +241,6 @@ const Home = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-[600] text-[#414141]  dark:text-white">
-            Welcome Mate!
-          </h1>
-          <h1 className="mt-3 text-3xl text-dark dark:text-white ">
-            Generate Some Beautiful Photos Today {inProgress > 0 && inProgress}
-          </h1>
-        </div>
-      </div>
-
       <form action="" onSubmit={handleGenerate}>
         <div className="mt-8 flex items-center gap-5">
           <div className="h-[4.5rem] flex-1 rounded-full border pr-2 dark:border-gray-600 dark:text-white">
@@ -267,9 +258,11 @@ const Home = () => {
               />
               <button
                 type="submit"
-                className="btn btn-primary h-[80%] bg-primary px-12 disabled:cursor-not-allowed disabled:opacity-70"
+                className="btn btn-primary h-[80%] whitespace-nowrap bg-primary px-12 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                <p>Generate</p>
+                {inProgress > 0
+                  ? `Generating ${inProgress} images`
+                  : "Generate"}
               </button>
             </div>
           </div>
@@ -557,7 +550,7 @@ const Home = () => {
                     <ScissorsIcon className="h-6 w-6 text-white" />
                   </span>
                 )}
-                {!image.isVector &&  !image.upscaled && !image.loading && (
+                {!image.isVector && !image.upscaled && !image.loading && (
                   <span
                     className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
                     onClick={() => handleUpscale(image)}

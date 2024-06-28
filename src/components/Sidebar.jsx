@@ -20,14 +20,10 @@ const Sidebar = () => {
           <MagnifyingGlassIcon className="w-5" />
           <span className="text-xs">Auto</span>
         </NavLinkItem>
-        {/* <NavLinkItem to={"/saved"}>
+        <NavLinkItem to={"/hunt"}>
           <BookmarkIcon className="w-5" />
-          <span className="text-xs">Saved</span>
+          <span className="text-xs">Hunt</span>
         </NavLinkItem>
-        <NavLinkItem to={"/upload"}>
-          <ArrowUpTrayIcon className="w-5" />
-          <span className="text-xs">Upload</span>
-        </NavLinkItem> */}
       </ul>
       <ul className="flex flex-col gap-7 py-6">
         <NavLinkItem to={"/settings"}>

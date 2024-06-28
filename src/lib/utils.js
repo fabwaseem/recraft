@@ -71,9 +71,9 @@ export const createSVGFromJSON = (data) => {
 };
 
 export const formatHex = (hex) => {
-  if (hex.length === 9) {
-    hex = hex.slice(0, -2);
-  }
+  // if (hex.length === 9) {
+  //   hex = hex.slice(0, -2);
+  // }
   return hex;
 };
 

@@ -5,6 +5,7 @@ import {
   svgToPngDataUrl,
 } from "../lib/utils";
 import Image from "image-js";
+import { toast } from "react-toastify";
 
 export const generateImages = async ({
   token,
