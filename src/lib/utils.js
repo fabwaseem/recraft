@@ -43,16 +43,16 @@ export const createSVGFromJSON = (data) => {
       const style = styleDict[shape.style_index];
       let fill = "";
       if (style.fill.style_type === "solid") {
-        fill = style.fill.solid_color.rgba_hex;
+        fill = formatHex(style.fill.solid_color.rgba_hex);
       } else if (style.fill.style_type === "linear") {
         const gradientId = `grad${gradientCounter++}`;
         fill = `url(#${gradientId})`;
         const { start_color, finish_color, start_point, finish_point } =
           style.fill;
         gradients.push(`
-        <linearGradient id="${gradientId}" gradientUnits="userSpaceOnUse" x1="${start_point.x}" y1="${start_point.y}" x2="${finish_point.x}" y2="${finish_point.y}">
-          <stop offset="0%" stop-color="${start_color.rgba_hex}" />
-          <stop offset="100%" stop-color="${finish_color.rgba_hex}" />
+        <linearGradient id="${gradientId}"  x1="${start_point.x}" y1="${start_point.y}" x2="${finish_point.x}" y2="${finish_point.y}">
+          <stop offset="0" stop-color="${formatHex(start_color.rgba_hex)}" />
+          <stop offset="1" stop-color="${formatHex(finish_color.rgba_hex)}" />
         </linearGradient>
       `);
       }
@@ -68,6 +68,13 @@ export const createSVGFromJSON = (data) => {
   const svgString = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >${defs}${paths}</svg>`;
 
   return svgString;
+};
+
+export const formatHex = (hex) => {
+  if (hex.length === 9) {
+    hex = hex.slice(0, -2);
+  }
+  return hex;
 };
 
 export function svgToPngDataUrl(svgString, width, height) {
