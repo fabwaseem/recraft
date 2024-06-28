@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   const navigate = useNavigate();
-   const location = useLocation();
+  const location = useLocation();
   function checkTokenExpiration() {
     const accessToken = localStorage.getItem("accessToken");
     const accessTokenExpiresAt = localStorage.getItem("accessTokenExpiresAt");
@@ -17,9 +17,7 @@ const App = () => {
       return;
     }
 
-    // Convert accessTokenExpiresAt (which is a string) to a number
     const expirationTime = new Date(accessTokenExpiresAt);
-
     const currentTime = new Date();
     if (currentTime > expirationTime) {
       localStorage.removeItem("accessToken");

@@ -20,7 +20,12 @@ const Explore = () => {
     if (isDarkMode) {
       setDarkMode(true);
     }
-  }, [localStorage]);
+
+    const storedSearches = localStorage.getItem("searches");
+    if (storedSearches) {
+      setSearches(JSON.parse(storedSearches));
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,7 +53,10 @@ const Explore = () => {
           facets: response.data.facets,
         },
       };
-      setSearches((prev) => [...prev, data]);
+      const prev = searches;
+      prev.unshift(data);
+      setSearches(prev);
+      localStorage.setItem("searches", JSON.stringify(prev));
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong");
@@ -86,6 +94,11 @@ const Explore = () => {
     return <pre>{JSON.stringify(dataToDisplay, null, 2)}</pre>;
   };
 
+  const handleClear = () => {
+    localStorage.removeItem("searches");
+    setSearches([]);
+  };
+
   return (
     <div>
       <form action="" onSubmit={handleSubmit} className="mb-10">
@@ -113,7 +126,7 @@ const Explore = () => {
           {
             // create array of contentType and map
             Object.keys(contentType).map((type, index) => (
-              <div key={index} className="flex items-center gap-4 flex-col">
+              <div key={index} className="flex flex-col items-center gap-4">
                 <label
                   htmlFor="images"
                   className="text-xl capitalize text-dark dark:text-white"
@@ -144,11 +157,18 @@ const Explore = () => {
         </div>
       </form>
 
-      {/* map all search in a beautiful table with number,keyword,totalAssets,total pages */}
-      {/* total assetsa are in searches[0].searchDetails.search_pagination.total_results */}
-      {/* total pages are in searches[0].searchDetails.search_pagination.total_pages */}
+      {searches.length > 0 && (
+        <div className="mb-5 flex items-center justify-between">
+          <h3 className="text-2xl">Search History</h3>
+          <button
+            onClick={handleClear}
+            className="btn btn-primary whitespace-nowrap"
+          >
+            Clear
+          </button>
+        </div>
+      )}
       <DataTable
-        title="Search Details"
         columns={columns}
         data={searches}
         pagination
