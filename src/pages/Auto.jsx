@@ -25,6 +25,12 @@ const Auto = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedPresetType, setSelectedPresetType] = useState(0);
+  const [generationLimit, setGenerationLimit] = useState(20);
+  const [inProgress, setInProgress] = useState(0);
+  const [selectedSizes, setSelectedSizes] = useState([]);
+  const [selectedStyles, setSelectedStyles] = useState([]);
+  const [generationQueue, setGenerationQueue] = useState([]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const [formData, setFormData] = useState({
     query: "",
@@ -47,11 +53,6 @@ const Auto = () => {
       }));
     }
   }, []);
-
-  const [inProgress, setInProgress] = useState(0);
-
-  const [selectedSizes, setSelectedSizes] = useState([]);
-  const [selectedStyles, setSelectedStyles] = useState([]);
 
   const sizeOptions = sizes.map((size) => ({
     value: size,
@@ -202,8 +203,7 @@ const Auto = () => {
         titles.length * selectedSizes.length * selectedStyles.length;
       setInProgress(totalInProgress);
 
-      const tasks = [];
-
+      const newQueue = [];
       for (const title of titles) {
         for (const size of selectedSizes) {
           const layer_size = {
@@ -211,48 +211,58 @@ const Auto = () => {
             width: size.width,
           };
           for (const style of selectedStyles) {
-            tasks.push(async () => {
-              let prompt = title;
-              if (formData.enhance) {
-                prompt = await generatePrompt(
-                  title + " in style of " + style.label,
-                );
-              }
-              await generate(layer_size, style, prompt, formData);
-              setInProgress((prev) => prev - 1);
-            });
+            let prompt = title;
+            if (formData.enhance) {
+              prompt = await generatePrompt(
+                title + " in style of " + style.label,
+              );
+            }
+            newQueue.push({ layer_size, style, prompt, formData });
           }
         }
       }
+      setGenerationQueue((prevQueue) => [...prevQueue, ...newQueue]);
+      setInProgress(newQueue.length);
 
-      // Run tasks with a concurrency limit of 10
-      await runWithConcurrency(2, tasks);
+      if (!isGenerating) {
+        processQueue();
+      }
     } catch (err) {
       toast.error(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const runWithConcurrency = async (limit, tasks) => {
-    const results = [];
-    const executing = [];
+  const processQueue = async () => {
+    if (generationQueue.length === 0 || images.length >= generationLimit) {
+      setIsGenerating(false);
+      return;
+    }
+    console.log({ generationQueue, images, generationLimit });
+    setIsGenerating(true);
+    const item = generationQueue[0];
 
-    for (const task of tasks) {
-      const p = Promise.resolve().then(() => task());
-      results.push(p);
-
-      if (limit <= tasks.length) {
-        const e = p.then(() => executing.splice(executing.indexOf(e), 1));
-        executing.push(e);
-        if (executing.length >= limit) {
-          await Promise.race(executing);
-        }
-      }
+    try {
+      await generate(item.layer_size, item.style, item.prompt, item.formData);
+    } catch (error) {
+      toast.error(error.response?.data?.code || error.message);
+      console.log(error);
     }
 
-    return Promise.all(results);
+    setGenerationQueue((prevQueue) => prevQueue.slice(1));
+    setInProgress((prev) => prev - 1);
+
+    setIsGenerating(false);
   };
+
+  useEffect(() => {
+    if (
+      images.length < generationLimit &&
+      generationQueue.length > 0 &&
+      !isGenerating
+    ) {
+      processQueue();
+    }
+  }, [images, generationQueue, generationLimit, isGenerating]);
 
   const generate = async (layer_size, style, prompt, formData) => {
     try {
@@ -338,7 +348,7 @@ const Auto = () => {
             </button>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        {/* <div className="flex items-center gap-4">
           <label
             htmlFor="enhance"
             className="text-xl text-dark dark:text-white "
@@ -361,6 +371,28 @@ const Auto = () => {
             <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
               {formData.enhance ? "On" : "Off"}
             </span>
+          </label>
+        </div> */}
+        <div className="relative mt-5 ">
+          <input
+            type="number"
+            className=" peer block w-full rounded-lg border bg-transparent p-4 text-sm text-dark dark:border-gray-600 dark:text-white [&:not(:placeholder-shown)]:pt-6 [&:not(:placeholder-shown)]:pb-2"
+            min={1}
+            value={generationLimit}
+            onChange={(e) => {
+              setGenerationLimit(e.target.value);
+            }}
+          />
+          <label
+            className="start-0 pointer-events-none absolute top-0 h-full truncate border border-transparent p-4 transition duration-100 ease-in-out peer-focus:-translate-y-1.5 peer-focus:text-xs peer-focus:text-gray-500
+    peer-disabled:pointer-events-none
+    peer-disabled:opacity-50
+    peer-[:not(:placeholder-shown)]:-translate-y-1.5
+    peer-[:not(:placeholder-shown)]:text-xs
+    peer-[:not(:placeholder-shown)]:text-gray-500
+    dark:text-white"
+          >
+            Max Images
           </label>
         </div>
       </form>

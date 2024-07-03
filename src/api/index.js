@@ -57,7 +57,6 @@ export const getImagesById = async ({ token, id, prompt }) => {
     );
     const imagesData = response.data.images;
     const images = [];
-    console.log(imagesData);
     for (const image of imagesData) {
       if (image.vector_image) {
         const svgData = createSVGFromJSON(image.rector);
