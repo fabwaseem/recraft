@@ -589,7 +589,7 @@ const Auto = () => {
 
       <MasonaryLayout>
         {images.map((image, index) => (
-          <div key={index}>
+          <div key={index} className={image.hidden ? "hidden" : ""}>
             <div className="group relative overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
               {image.loading && (
                 <div className="absolute top-0 left-0 flex h-full w-full items-center justify-center bg-[#00000038] text-white">
@@ -621,7 +621,7 @@ const Auto = () => {
                         .slice(0, formData.filnameLength) || "image"
                     }
                     sizeMultiplier={formData.multiplier}
-                    index={index}
+                    id={image.id}
                     setImages={setImages}
                   />
                 ) : (
@@ -634,7 +634,7 @@ const Auto = () => {
                     }
                     extension={image.bgRemoved ? "png" : formData.extension}
                     sizeMultiplier={formData.multiplier}
-                    index={index}
+                    id={image.id}
                     setImages={setImages}
                   />
                 )}

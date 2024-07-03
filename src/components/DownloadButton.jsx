@@ -7,10 +7,19 @@ const DownloadButton = ({
   fileName = "image2",
   extension = "jpg",
   sizeMultiplier = 1,
-  index,
+  id,
   setImages,
 }) => {
   const handleDownload = async () => {
+    setImages((prevImages) => {
+      return prevImages.map((image) => {
+        if (image.id === id) {
+          return { ...image, hidden: true };
+        }
+        return image;
+      });
+    });
+
     const image = await Image.load(blob);
 
     let resizedImage = image;
@@ -25,7 +34,7 @@ const DownloadButton = ({
 
     saveAs(resizedBlob, `${fileName}.${extension}`);
     setImages((prevImages) => {
-      return prevImages.filter((_, i) => i !== index);
+      return prevImages.filter((image) => image.id !== id);
     });
   };
 

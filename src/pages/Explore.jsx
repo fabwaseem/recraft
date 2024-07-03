@@ -41,7 +41,6 @@ const Explore = () => {
     try {
       const response = await axios.get(apiUrl);
 
-      console.log(response.data);
       let data = {
         keyword,
         assetsDetails: response.data.items,

@@ -57,6 +57,7 @@ export const getImagesById = async ({ token, id, prompt }) => {
     );
     const imagesData = response.data.images;
     const images = [];
+    console.log(imagesData);
     for (const image of imagesData) {
       if (image.vector_image) {
         const svgData = createSVGFromJSON(image.rector);
@@ -72,6 +73,7 @@ export const getImagesById = async ({ token, id, prompt }) => {
         });
         const thumbUrl = thumb.toDataURL();
         const imageData = {
+          id: image.image_id,
           thumb: thumbUrl,
           url: svgData,
           width: image.rector.width,
@@ -81,6 +83,7 @@ export const getImagesById = async ({ token, id, prompt }) => {
           loading: false,
           upscaled: false,
           isVector: true,
+          hidden: false,
         };
         images.push(imageData);
       } else {
@@ -111,6 +114,7 @@ export const getImageById = async ({ token, id, prompt }) => {
     const thumb = image.resize({ width: 1000, preserveAspectRatio: true });
     const thumbUrl = thumb.toDataURL();
     const imageData = {
+      id,
       thumb: thumbUrl,
       url: imageURL,
       width: image.width,
@@ -120,6 +124,7 @@ export const getImageById = async ({ token, id, prompt }) => {
       loading: false,
       upscaled: false,
       isVector: false,
+      hidden: false,
     };
     return imageData;
   } catch (error) {
