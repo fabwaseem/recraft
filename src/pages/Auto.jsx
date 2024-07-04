@@ -81,9 +81,33 @@ const Auto = () => {
     // setSelectedStyles([]);
   };
 
-  const handleRemove = async (image) => {
-    const imageData = await Image.load(image.url);
-    const base64 = await imageData.toDataURL("image/png");
+  function svgToBase64(svgCode) {
+    return new Promise((resolve, reject) => {
+      const blob = new Blob([svgCode], { type: "image/svg+xml" });
+      const reader = new FileReader();
+
+      reader.onloadend = function () {
+        const base64data = reader.result;
+        resolve(base64data);
+      };
+
+      reader.onerror = function (error) {
+        reject(error);
+      };
+
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  const handleRemove = async (image, vector) => {
+    let imageData = "";
+    if (vector) {
+      imageData = await svgToBase64(image.url);
+      console.log(imageData);
+    } else {
+      imageData = await Image.load(image.url);
+      imageData = await imageData.toDataURL("image/png");
+    }
     // set image.loading to true
     setImages((prevImages) => {
       return prevImages.map((prevImage) => {
@@ -96,7 +120,11 @@ const Auto = () => {
         return prevImage;
       });
     });
-    const res = await removeBg({ image: base64, token: formData.token });
+    const res = await removeBg({
+      image: imageData,
+      token: formData.token,
+      vector,
+    });
     const newImageId = res.data.result.image_id;
 
     const newImage = await getImageById({
@@ -199,9 +227,6 @@ const Auto = () => {
       if (!titles.length) {
         return toast.error("Images not found this page");
       }
-      const totalInProgress =
-        titles.length * selectedSizes.length * selectedStyles.length;
-      setInProgress(totalInProgress);
 
       const newQueue = [];
       for (const title of titles) {
@@ -222,13 +247,15 @@ const Auto = () => {
         }
       }
       setGenerationQueue((prevQueue) => [...prevQueue, ...newQueue]);
-      setInProgress(newQueue.length);
+      setInProgress((prev) => prev + newQueue.length);
 
       if (!isGenerating) {
         processQueue();
       }
     } catch (err) {
       toast.error(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -670,15 +697,15 @@ const Auto = () => {
                     setImages={setImages}
                   />
                 )}
-                {!image.bgRemoved && !image.loading && (
+                {!image.bgRemoved && !image.isVector && !image.loading && (
                   <span
                     className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
-                    onClick={() => handleRemove(image)}
+                    onClick={() => handleRemove(image, image.isVector)}
                   >
                     <ScissorsIcon className="h-6 w-6 text-white" />
                   </span>
                 )}
-                {!image.upscaled && !image.loading && (
+                {!image.upscaled && !image.isVector && !image.loading && (
                   <span
                     className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
                     onClick={() => handleUpscale(image)}

@@ -542,10 +542,10 @@ const Home = () => {
                     setImages={setImages}
                   />
                 )}
-                {!image.isVector && !image.bgRemoved && !image.loading && (
+                {!image.bgRemoved && !image.isVector && !image.loading && (
                   <span
                     className="mb-2 flex h-10 w-10 cursor-pointer items-center justify-center rounded bg-[#00000038] transition-all hover:bg-[#0000008a]"
-                    onClick={() => handleRemove(image)}
+                    onClick={() => handleRemove(image, image.isVector)}
                   >
                     <ScissorsIcon className="h-6 w-6 text-white" />
                   </span>

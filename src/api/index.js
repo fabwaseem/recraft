@@ -55,7 +55,15 @@ export const getImagesById = async ({ token, id, prompt }) => {
         },
       },
     );
+    if (response.status === 202) {
+      toast.error("Its taking longer than usual, plaease wait.");
+      return getImagesById({ token, id, prompt });
+    }
     const imagesData = response.data.images;
+    if (!imagesData) {
+      toast.error("Something went wrong, please try again.");
+      return [];
+    }
     const images = [];
     for (const image of imagesData) {
       if (image.vector_image) {
@@ -131,7 +139,7 @@ export const getImageById = async ({ token, id, prompt }) => {
   }
 };
 
-export const removeBg = async ({ image, token }) => {
+export const removeBg = async ({ image, token, vector = false }) => {
   try {
     const response = await axios.post(
       `https://api.recraft.ai/project/82338175-2411-4983-9c0a-4acb10191148/remove_background`,
@@ -139,7 +147,7 @@ export const removeBg = async ({ image, token }) => {
         image: {
           data_url: image,
         },
-        return_vector: false,
+        return_vector: vector,
       },
       {
         headers: {
