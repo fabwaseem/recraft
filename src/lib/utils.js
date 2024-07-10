@@ -71,9 +71,9 @@ export const createSVGFromJSON = (data) => {
 };
 
 export const formatHex = (hex) => {
-  // if (hex.length === 9) {
-  //   hex = hex.slice(0, -2);
-  // }
+  if (hex.length === 9) {
+    hex = hex.slice(0, -2);
+  }
   return hex;
 };
 
@@ -140,7 +140,8 @@ export const handleDownloadAll = async (images, formData) => {
       const fileNameWithExtension = `${fileName} - ${index + 1}.svg`;
       folder.file(fileNameWithExtension, svgBlob);
     } else {
-      const image = await Image.load(img.url);
+      let image = await Image.load(image.url);
+      image = image.rgba8();
 
       const extension = img.bgRemoved ? "png" : formData.extension;
       let resizedImage = image;

@@ -20,14 +20,23 @@ const DownloadButton = ({
       });
     });
 
-    const image = await Image.load(blob);
-
+    let image = await Image.load(blob);
+    image = image.rgba8();
     let resizedImage = image;
     if (sizeMultiplier > 1) {
       resizedImage = image.resize({
         width: image.width * sizeMultiplier,
         height: image.height * sizeMultiplier,
       });
+    }
+
+    // Determine the output format based on the extension
+    const outputFormat =
+      extension.toLowerCase() === "png" ? "image/png" : "image/jpeg";
+
+    // For PNG, we need to remove the alpha channel to ensure RGB
+    if (outputFormat === "image/png") {
+      resizedImage = resizedImage.rgba8();
     }
 
     const resizedBlob = await resizedImage.toBlob("image/png");
