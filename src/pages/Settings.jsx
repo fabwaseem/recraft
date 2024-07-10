@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import WhatsApp from "../assets/whatsapp.png";
 
 const Settings = () => {
   const [formData, setFormData] = useState({
@@ -35,7 +36,7 @@ const Settings = () => {
 
   return (
     <div>
-      <h1 className="mt-3 text-3xl  ">App Settings</h1>
+      <h1 className="mt-3 text-3xl  ">Add Key</h1>
       <form className="mt-5" onSubmit={handleSave}>
         <div className="relative flex-1">
           <textarea
@@ -57,13 +58,17 @@ const Settings = () => {
           >
             Token
           </label>
-          {/* <a
-            href="https://app.recraft.ai/api/auth/session"
-            target="_blank"
-            className="mt-2 block w-max text-sm hover:text-primary"
-          >
-            Get token
-          </a> */}
+          <p className="mt-4 flex items-center gap-3">
+            Contact on whatsapp to get a key
+            <a
+              href={"https://wa.link/cly2m7"}
+              className="flex items-center gap-1 text-green-500"
+              target="_blank"
+            >
+              {" "}
+              <img alt="whatapp" src={WhatsApp} className="h-5 w-5" /> Whatsapp
+            </a>
+          </p>
         </div>
         <button
           type="submit"
