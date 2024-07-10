@@ -1,6 +1,7 @@
 import {
   ArrowUpTrayIcon,
   BookmarkIcon,
+  CheckBadgeIcon,
   HomeIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
@@ -9,15 +10,15 @@ import NavLinkItem from "./NavLinkItem";
 
 const MobileNav = () => {
   return (
-    <nav className="fixed bottom-0 left-0 w-full h-16 bg-white dark:bg-darkBg border-t-[1px] dark:border-gray-600 transition-colors  z-50">
-      <ul className="px-6 h-full flex justify-center items-center gap-7 flex-1">
+    <nav className="fixed bottom-0 left-0 z-50 h-16 w-full border-t-[1px] bg-white transition-colors dark:border-gray-600  dark:bg-darkBg">
+      <ul className="flex h-full flex-1 items-center justify-center gap-7 px-6">
         <NavLinkItem to={"/"}>
-          <HomeIcon className="w-5" />
-          <span className="text-xs">Home</span>
+          <CheckBadgeIcon className="w-5" />
+          <span className="text-xs">Single</span>
         </NavLinkItem>
         <NavLinkItem to={"/auto"}>
           <MagnifyingGlassIcon className="w-5" />
-          <span className="text-xs">Auto</span>
+          <span className="text-xs">Multi</span>
         </NavLinkItem>
       </ul>
     </nav>

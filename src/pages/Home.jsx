@@ -14,6 +14,7 @@ import Select from "react-select";
 import { generatePrompt, handleDownloadAll } from "../lib/utils";
 import Image from "image-js";
 import {
+  ArrowDownCircleIcon,
   ArrowsPointingOutIcon,
   ScissorsIcon,
   XMarkIcon,
@@ -248,7 +249,7 @@ const Home = () => {
               <input
                 type="text"
                 className="h-full w-full bg-transparent pl-8 outline-none"
-                placeholder="Write a full prompt or just a keyword to let AI imagine the best"
+                placeholder="Write a full prompt"
                 value={formData.prompt}
                 onChange={(e) =>
                   setFormData((prev) => {
@@ -266,7 +267,7 @@ const Home = () => {
               </button>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          {/* <div className="flex items-center gap-4">
             <label
               htmlFor="enhance"
               className="text-xl text-dark dark:text-white "
@@ -290,7 +291,7 @@ const Home = () => {
                 {formData.enhance ? "On" : "Off"}
               </span>
             </label>
-          </div>
+          </div> */}
         </div>
       </form>
       <div className="flex gap-5">
@@ -447,7 +448,7 @@ const Home = () => {
     peer-[:not(:placeholder-shown)]:text-gray-500
     dark:text-white"
           >
-            Multiplier
+            Upscale times
           </label>
         </div>
         <div className="relative flex-1">
@@ -475,21 +476,29 @@ const Home = () => {
           </label>
         </div>
       </div>
-      <h1 className="mt-8 mb-2 flex items-center gap-2 text-3xl text-dark dark:text-white ">
-        Generated Images{" "}
-        <button
-          className={`rounded-md border p-1 text-xs hover:bg-gray-100 focus:outline-none  focus:ring focus:ring-blue-300`}
-          onClick={() => setImages([])}
-        >
-          Clear all
-        </button>
-        <button
-          className={`rounded-md border p-1 text-xs hover:bg-gray-100 focus:outline-none  focus:ring focus:ring-blue-300`}
-          onClick={() => handleDownloadAll(images, formData)}
-        >
-          Download all
-        </button>
-      </h1>
+      <div className="flex items-center justify-between ">
+        <h1 className="mt-8 mb-2 flex items-center gap-2 text-3xl text-dark dark:text-white ">
+          Generated Images {images.length > 0 && `(${images.length})`}
+        </h1>
+        {images.length > 0 && (
+          <div className="flex items-center gap-5">
+            <button
+              className={`flex items-center gap-2 rounded-md border py-3 px-5 text-xs  hover:bg-gray-100 focus:outline-none focus:ring focus:ring-blue-300 dark:hover:text-black`}
+              onClick={() => setImages([])}
+            >
+              <XMarkIcon className="h-5 w-5" />
+              Clear all
+            </button>
+            <button
+              className={`flex items-center gap-2 rounded-md border py-3 px-5 text-xs  hover:bg-gray-100 focus:outline-none focus:ring focus:ring-blue-300 dark:hover:text-black`}
+              onClick={() => handleDownloadAll(images, formData)}
+            >
+              <ArrowDownCircleIcon className="h-5 w-5" />
+              Download all
+            </button>
+          </div>
+        )}
+      </div>
 
       <MasonaryLayout>
         {images.map((image, index) => (

@@ -1,6 +1,7 @@
 import {
   ArrowUpTrayIcon,
   BookmarkIcon,
+  CheckCircleIcon,
   Cog8ToothIcon,
   HomeIcon,
   MagnifyingGlassIcon,
@@ -13,12 +14,12 @@ const Sidebar = () => {
     <nav className=" fixed top-20 z-10 flex h-[calc(100%-5rem)] w-24   flex-col border-r-[1px] bg-white transition-colors dark:border-gray-600 dark:bg-darkBg ">
       <ul className="flex flex-1 flex-col gap-7 py-6">
         <NavLinkItem to={"/"}>
-          <HomeIcon className="w-5" />
-          <span className="text-xs">Home</span>
+          <CheckCircleIcon className="w-5" />
+          <span className="text-center text-xs">Single</span>
         </NavLinkItem>
         <NavLinkItem to={"/auto"}>
           <MagnifyingGlassIcon className="w-5" />
-          <span className="text-xs">Auto</span>
+          <span className="text-center text-xs">Multi</span>
         </NavLinkItem>
         <NavLinkItem to={"/hunt"}>
           <BookmarkIcon className="w-5" />

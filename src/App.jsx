@@ -10,22 +10,13 @@ const App = () => {
   const location = useLocation();
   function checkTokenExpiration() {
     const accessToken = localStorage.getItem("accessToken");
-    const accessTokenExpiresAt = localStorage.getItem("accessTokenExpiresAt");
 
-    if (!accessToken || !accessTokenExpiresAt) {
+    if (!accessToken) {
       navigate("/settings?error=token"); // Redirect if no token
       return;
     }
 
-    const expirationTime = new Date(accessTokenExpiresAt);
-    const currentTime = new Date();
-    if (currentTime > expirationTime) {
-      localStorage.removeItem("accessToken");
-      navigate("/settings?error=expire"); // Redirect if no token
-      return;
-    } else {
-      return accessToken;
-    }
+    return accessToken;
   }
   useEffect(() => {
     const token = checkTokenExpiration();

@@ -13,6 +13,7 @@ import Select from "react-select";
 import { generatePrompt, handleDownloadAll } from "../lib/utils";
 import Image from "image-js";
 import {
+  ArrowDownCircleIcon,
   ArrowsPointingOutIcon,
   ScissorsIcon,
   XMarkIcon,
@@ -302,7 +303,11 @@ const Auto = () => {
       });
       await fetchImages(response.data.operationId, prompt);
     } catch (error) {
-      toast.error(error.response?.data?.code || error.message);
+      toast.error(
+        error.response?.data?.message ||
+          error.response?.data?.code ||
+          error.message,
+      );
 
       console.log(error);
     }
@@ -358,7 +363,7 @@ const Auto = () => {
             <input
               type="text"
               className="h-full w-full bg-transparent pl-8 outline-none"
-              placeholder="Enter a keyword or link"
+              placeholder="Enter a keyword or Adobe stock link"
               value={formData.query}
               onChange={(e) =>
                 setFormData((prev) => {
@@ -371,7 +376,7 @@ const Auto = () => {
               disabled={loading}
               className="btn btn-primary h-[80%] whitespace-nowrap bg-primary px-12 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {inProgress > 0 ? `Generating ${inProgress} images` : "Generate"}
+              {inProgress > 0 ? `${inProgress} images in queue` : "Generate"}
             </button>
           </div>
         </div>
@@ -419,7 +424,7 @@ const Auto = () => {
     peer-[:not(:placeholder-shown)]:text-gray-500
     dark:text-white"
           >
-            Max Images
+            Max Images On page
           </label>
         </div>
       </form>
@@ -444,7 +449,7 @@ const Auto = () => {
     peer-[:not(:placeholder-shown)]:text-gray-500
     dark:text-white"
         >
-          Page
+          Adobe Stock Page
         </label>
       </div>
       <div className="flex gap-5">
@@ -602,7 +607,7 @@ const Auto = () => {
     peer-[:not(:placeholder-shown)]:text-gray-500
     dark:text-white"
           >
-            Multiplier
+            Upscale times
           </label>
         </div>
         <div className="relative flex-1">
@@ -630,21 +635,29 @@ const Auto = () => {
           </label>
         </div>
       </div>
-      <h1 className="mt-8 mb-2 flex items-center gap-2 text-3xl text-dark dark:text-white ">
-        Generated Images{" "}
-        <button
-          className={`rounded-md border p-1 text-xs hover:bg-gray-100 focus:outline-none  focus:ring focus:ring-blue-300`}
-          onClick={() => setImages([])}
-        >
-          Clear all
-        </button>
-        <button
-          className={`rounded-md border p-1 text-xs hover:bg-gray-100 focus:outline-none  focus:ring focus:ring-blue-300`}
-          onClick={() => handleDownloadAll(images, formData)}
-        >
-          Download all
-        </button>
-      </h1>
+      <div className="flex items-center justify-between ">
+        <h1 className="mt-8 mb-2 flex items-center gap-2 text-3xl text-dark dark:text-white ">
+          Generated Images {images.length > 0 && `(${images.length})`}
+        </h1>
+        {images.length > 0 && (
+          <div className="flex items-center gap-5">
+            <button
+              className={`flex items-center gap-2 rounded-md border py-3 px-5 text-xs  hover:bg-gray-100 focus:outline-none focus:ring focus:ring-blue-300 dark:hover:text-black`}
+              onClick={() => setImages([])}
+            >
+              <XMarkIcon className="h-5 w-5" />
+              Clear all
+            </button>
+            <button
+              className={`flex items-center gap-2 rounded-md border py-3 px-5 text-xs  hover:bg-gray-100 focus:outline-none focus:ring focus:ring-blue-300 dark:hover:text-black`}
+              onClick={() => handleDownloadAll(images, formData)}
+            >
+              <ArrowDownCircleIcon className="h-5 w-5" />
+              Download all
+            </button>
+          </div>
+        )}
+      </div>
 
       <MasonaryLayout>
         {images.map((image, index) => (

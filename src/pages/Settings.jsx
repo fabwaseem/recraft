@@ -12,16 +12,15 @@ const Settings = () => {
   const handleSave = (e) => {
     e.preventDefault();
     try {
-      const parsedData = JSON.parse(formData.token.trim());
-      if (parsedData) {
-        localStorage.setItem("accessToken", parsedData.accessToken);
-        localStorage.setItem("accessTokenExpiresAt", parsedData.expires);
+      const token = formData.token;
+      if (token) {
+        localStorage.setItem("accessToken", token);
         toast.success("Token added successfully");
         navigate("/auto");
       }
     } catch (error) {
+      toast.error("Invalid token");
       console.error("Error parsing JSON:", error);
-      // Display an error message to the user if needed
     }
   };
 
@@ -58,13 +57,13 @@ const Settings = () => {
           >
             Token
           </label>
-          <a
+          {/* <a
             href="https://app.recraft.ai/api/auth/session"
             target="_blank"
             className="mt-2 block w-max text-sm hover:text-primary"
           >
             Get token
-          </a>
+          </a> */}
         </div>
         <button
           type="submit"
