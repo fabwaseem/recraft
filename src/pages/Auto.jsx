@@ -20,6 +20,7 @@ import {
 import { presets, sizes } from "../lib/config";
 import axios from "axios";
 import DownloadSvg from "../components/DownloadSvg";
+import { saveAs } from "file-saver";
 
 const Auto = () => {
   const [images, setImages] = useState([]);
@@ -316,7 +317,18 @@ const Auto = () => {
         prompt,
       });
 
-      setImages((prevImages) => [...response, ...prevImages]);
+      // setImages((prevImages) => [...response, ...prevImages]);
+      await Promise.all(
+        response.map(async (image) => {
+          const fileName =
+            image.prompt
+              .replace(/[^a-zA-Z0-9 ]/g, "")
+              .slice(0, formData.filnameLength) || "image";
+          const extension = image.bgRemoved ? "png" : formData.extension;
+
+          await download(image.url, fileName, formData.multiplier, extension);
+        }),
+      );
 
       if (formData.autoUpscale) {
         response.forEach(async (image) => {
@@ -328,6 +340,31 @@ const Auto = () => {
 
       console.log(error);
     }
+  };
+
+  const download = async (blob, fileName, sizeMultiplier, extension) => {
+    let image = await Image.load(blob);
+    image = image.rgba8();
+    let resizedImage = image;
+    if (sizeMultiplier > 1) {
+      resizedImage = image.resize({
+        width: image.width * sizeMultiplier,
+        height: image.height * sizeMultiplier,
+      });
+    }
+
+    // Determine the output format based on the extension
+    const outputFormat =
+      extension.toLowerCase() === "png" ? "image/png" : "image/jpeg";
+
+    // For PNG, we need to remove the alpha channel to ensure RGB
+    if (outputFormat === "image/png") {
+      resizedImage = resizedImage.rgba8();
+    }
+
+    const resizedBlob = await resizedImage.toBlob("image/png");
+
+    saveAs(resizedBlob, `${fileName}.${extension}`);
   };
 
   const extractTitles = (data) => {
