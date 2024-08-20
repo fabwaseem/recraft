@@ -326,7 +326,11 @@ const Auto = () => {
               .slice(0, formData.filnameLength) || "image";
           const extension = image.bgRemoved ? "png" : formData.extension;
 
-          await download(image.url, fileName, formData.multiplier, extension);
+          if (image.isVector) {
+            downloadSvgDirect(image.url, fileName, image.id);
+          } else {
+            await download(image.url, fileName, formData.multiplier, extension);
+          }
         }),
       );
 
@@ -365,6 +369,24 @@ const Auto = () => {
     const resizedBlob = await resizedImage.toBlob("image/png");
 
     saveAs(resizedBlob, `${fileName}.${extension}`);
+  };
+
+  // svg={image.url}
+  //                   fileName={
+  //                     image.prompt
+  //                       .replace(/[^a-zA-Z0-9 ]/g, "")
+  //                       .slice(0, formData.filnameLength) || "image"
+  //                   }
+  //                   sizeMultiplier={formData.multiplier}
+  //                   id={image.id}
+  //                   setImages={setImages}
+
+  const downloadSvgDirect = async (svg, fileName = "image2", id) => {
+    const svgBlob = new Blob([svg], {
+      type: "image/svg+xml;charset=utf-8",
+    });
+
+    saveAs(svgBlob, `${fileName}.svg`);
   };
 
   const extractTitles = (data) => {
