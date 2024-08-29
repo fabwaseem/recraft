@@ -39,7 +39,7 @@ const Auto = () => {
     extension: "jpg",
     token: "",
     filnameLength: 100,
-    autoUpscale: false,
+    autoRemove: false,
     page: 1,
     enhance: false,
     complexity: undefined,
@@ -317,33 +317,37 @@ const Auto = () => {
         prompt,
       });
 
-      // setImages((prevImages) => [...response, ...prevImages]);
-      await Promise.all(
-        response.map(async (image) => {
-          const fileName =
-            image.prompt
-              .replace(/[^a-zA-Z0-9 ]/g, "")
-              .slice(0, formData.filnameLength) || "image";
-          const extension = image.bgRemoved ? "png" : formData.extension;
+      setImages((prevImages) => [...response, ...prevImages]);
 
-          if (image.isVector) {
-            downloadSvgDirect(image.url, fileName, image.id);
-          } else {
-            await download(image.url, fileName, formData.multiplier, extension);
-          }
-        }),
-      );
-
-      if (formData.autoUpscale) {
+      if (formData.autoRemove) {
         response.forEach(async (image) => {
-          handleUpscale(image);
+          handleRemove(image, image.isVector);
         });
       }
+
+      downloadAuto();
     } catch (error) {
       toast.error(error.response?.data?.code || error.message);
-
       console.log(error);
     }
+  };
+
+  const downloadAuto = async () => {
+    await Promise.all(
+      images.map(async (image) => {
+        const fileName =
+          image.prompt
+            .replace(/[^a-zA-Z0-9 ]/g, "")
+            .slice(0, formData.filnameLength) || "image";
+        const extension = image.bgRemoved ? "png" : formData.extension;
+
+        if (image.isVector) {
+          downloadSvgDirect(image.url, fileName, image.id);
+        } else {
+          await download(image.url, fileName, formData.multiplier, extension);
+        }
+      }),
+    );
   };
 
   const download = async (blob, fileName, sizeMultiplier, extension) => {
@@ -567,22 +571,22 @@ const Auto = () => {
 
         <div>
           <h1 className="mt-5  text-xl text-dark dark:text-white ">
-            Auto Upscale
+            Auto Bg Remove
           </h1>
           <label className="inline-flex cursor-pointer items-center">
             <input
               type="checkbox"
               className="peer sr-only"
-              checked={formData.autoUpscale}
+              checked={formData.autoRemove}
               onChange={(e) => {
                 setFormData((prev) => {
-                  return { ...prev, autoUpscale: e.target.checked };
+                  return { ...prev, autoRemove: e.target.checked };
                 });
               }}
             />
             <div className="after:start-[2px] peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800"></div>
             <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-              {formData.autoUpscale ? "On" : "Off"}
+              {formData.autoRemove ? "On" : "Off"}
             </span>
           </label>
         </div>
