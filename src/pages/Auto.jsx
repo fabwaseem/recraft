@@ -109,18 +109,7 @@ const Auto = () => {
       imageData = await Image.load(image.url);
       imageData = await imageData.toDataURL("image/png");
     }
-    // set image.loading to true
-    setImages((prevImages) => {
-      return prevImages.map((prevImage) => {
-        if (prevImage.url === image.url) {
-          return {
-            ...prevImage,
-            loading: true,
-          };
-        }
-        return prevImage;
-      });
-    });
+
     const res = await removeBg({
       image: imageData,
       token: formData.token,
@@ -133,18 +122,29 @@ const Auto = () => {
       id: newImageId,
       prompt: image.prompt,
     });
-    setImages((prevImages) => {
-      return prevImages.map((prevImage) => {
-        if (prevImage.url === image.url) {
-          return {
-            ...newImage,
-            bgRemoved: true,
-            loading: false,
-          };
-        }
-        return prevImage;
-      });
-    });
+    // setImages((prevImages) => {
+    //   return prevImages.map((prevImage) => {
+    //     if (prevImage.url === image.url) {
+    //       return {
+    //         ...newImage,
+    //         bgRemoved: true,
+    //         loading: false,
+    //       };
+    //     }
+    //     return prevImage;
+    //   });
+    // });
+    const fileName =
+      image.prompt
+        .replace(/[^a-zA-Z0-9 ]/g, "")
+        .slice(0, formData.filnameLength) || "image";
+    const extension = "png"
+
+    if (image.isVector) {
+      downloadSvgDirect(newImage.url, fileName, image.id);
+    } else {
+      await download(newImage.url, fileName, formData.multiplier, extension);
+    }
   };
   const handleUpscale = async (image) => {
     const imageData = await Image.load(image.url);
@@ -317,12 +317,11 @@ const Auto = () => {
         prompt,
       });
 
-      setImages((prevImages) => [...response, ...prevImages]);
-
       if (formData.autoRemove) {
         response.forEach(async (image) => {
           handleRemove(image, image.isVector);
         });
+        return;
       }
 
       downloadAuto();
