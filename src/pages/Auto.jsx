@@ -324,14 +324,14 @@ const Auto = () => {
         return;
       }
 
-      downloadAuto();
+      downloadAuto(response);
     } catch (error) {
       toast.error(error.response?.data?.code || error.message);
       console.log(error);
     }
   };
 
-  const downloadAuto = async () => {
+  const downloadAuto = async (images) => {
     await Promise.all(
       images.map(async (image) => {
         const fileName =
