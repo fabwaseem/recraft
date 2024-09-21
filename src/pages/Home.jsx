@@ -413,6 +413,7 @@ const Home = () => {
           >
             <option value="jpg">JPG</option>
             <option value="png">PNG</option>
+            <option value="svg">SVG</option>
           </select>
           <label
             className="start-0 pointer-events-none absolute top-0 h-full truncate border border-transparent p-4 transition duration-100 ease-in-out peer-focus:-translate-y-1.5 peer-focus:text-xs peer-focus:text-gray-500
@@ -527,6 +528,8 @@ const Home = () => {
                     sizeMultiplier={formData.multiplier}
                     id={image.id}
                     setImages={setImages}
+                    extension={formData.extension}
+                    multiplier={formData.multiplier}
                   />
                 ) : (
                   <DownloadButton

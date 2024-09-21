@@ -112,6 +112,10 @@ export const presets = [
         value: "vector_illustration",
       },
       {
+        label: "Vector Outline",
+        value: "icon_outline",
+      },
+      {
         label: "Flying Blobs",
         value: "vector_illustration_line_circuit",
       },

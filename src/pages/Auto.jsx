@@ -104,7 +104,6 @@ const Auto = () => {
     let imageData = "";
     if (vector) {
       imageData = await svgToBase64(image.url);
-      console.log(imageData);
     } else {
       imageData = await Image.load(image.url);
       imageData = await imageData.toDataURL("image/png");
@@ -138,10 +137,15 @@ const Auto = () => {
       image.prompt
         .replace(/[^a-zA-Z0-9 ]/g, "")
         .slice(0, formData.filnameLength) || "image";
-    const extension = "png"
 
     if (image.isVector) {
-      downloadSvgDirect(newImage.url, fileName, image.id);
+      downloadSvgDirect(
+        newImage.url,
+        fileName,
+        image.id,
+        formData.extension,
+        formData.multiplier,
+      );
     } else {
       await download(newImage.url, fileName, formData.multiplier, extension);
     }
@@ -265,7 +269,6 @@ const Auto = () => {
       setIsGenerating(false);
       return;
     }
-    console.log({ generationQueue, images, generationLimit });
     setIsGenerating(true);
     const item = generationQueue[0];
 
@@ -341,7 +344,13 @@ const Auto = () => {
         const extension = image.bgRemoved ? "png" : formData.extension;
 
         if (image.isVector) {
-          downloadSvgDirect(image.url, fileName, image.id);
+          await downloadSvgDirect(
+            image.url,
+            fileName,
+            image.id,
+            formData.extension,
+            formData.multiplier,
+          );
         } else {
           await download(image.url, fileName, formData.multiplier, extension);
         }
@@ -384,12 +393,60 @@ const Auto = () => {
   //                   id={image.id}
   //                   setImages={setImages}
 
-  const downloadSvgDirect = async (svg, fileName = "image2", id) => {
-    const svgBlob = new Blob([svg], {
-      type: "image/svg+xml;charset=utf-8",
-    });
+  const downloadSvgDirect = async (
+    svg,
+    fileName = "image2",
+    id,
+    extension = "svg",
+    multiplier = 1,
+  ) => {
+    if (extension === "svg") {
+      // If SVG is selected, save directly as before
+      const svgBlob = new Blob([svg], {
+        type: "image/svg+xml;charset=utf-8",
+      });
+      saveAs(svgBlob, `${fileName}.svg`);
+    } else {
+      // For PNG or JPG, we need to render the SVG to a canvas first
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
 
-    saveAs(svgBlob, `${fileName}.svg`);
+      img.onload = () => {
+        console.log("img onload");
+        // Apply multiplier to width and height
+        const scaledWidth = img.width * multiplier;
+        const scaledHeight = img.height * multiplier;
+
+        canvas.width = scaledWidth;
+        canvas.height = scaledHeight;
+
+        if (extension === "jpg") {
+          // Add white background for JPG
+          ctx.fillStyle = "white";
+          ctx.fillRect(0, 0, scaledWidth, scaledHeight);
+        }
+
+        // Draw the image with the new dimensions
+        ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
+
+        canvas.toBlob(
+          (blob) => {
+            saveAs(blob, `${fileName}.${extension}`);
+          },
+          `image/${extension === "jpg" ? "jpeg" : extension}`,
+        );
+      };
+
+      // Convert SVG to data URL
+      const svgBlob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        console.log("svg to data url");
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(svgBlob);
+    }
   };
 
   const extractTitles = (data) => {
@@ -630,6 +687,7 @@ const Auto = () => {
           >
             <option value="jpg">JPG</option>
             <option value="png">PNG</option>
+            <option value="svg">SVG</option>
           </select>
           <label
             className="start-0 pointer-events-none absolute top-0 h-full truncate border border-transparent p-4 transition duration-100 ease-in-out peer-focus:-translate-y-1.5 peer-focus:text-xs peer-focus:text-gray-500
@@ -744,6 +802,8 @@ const Auto = () => {
                     sizeMultiplier={formData.multiplier}
                     id={image.id}
                     setImages={setImages}
+                    extension={formData.extension}
+                    multiplier={formData.multiplier}
                   />
                 ) : (
                   <DownloadButton
