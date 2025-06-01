@@ -23,6 +23,7 @@ export const generateImages = async ({
       layer_size,
       random_seed: getRandomNumber(10),
       developer_params: {},
+      num_images_per_prompt: 1,
     };
 
     if (formData.complexity) {

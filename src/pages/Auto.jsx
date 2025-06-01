@@ -224,12 +224,17 @@ const Auto = () => {
       }
       const data = JSON.parse(scriptTag.textContent);
       const titles = extractTitles(data);
-      if (!titles.length) {
+      // filter  which are shorter than 3 words
+      const filteredTitles = titles.filter(
+        (title, index, self) =>
+          self.indexOf(title) === index && title.split(" ").length > 3,
+      );
+      if (!filteredTitles.length) {
         return toast.error("Images not found this page");
       }
 
       const newQueue = [];
-      for (const title of titles) {
+      for (const title of filteredTitles) {
         for (const size of selectedSizes) {
           const layer_size = {
             height: size.height,
